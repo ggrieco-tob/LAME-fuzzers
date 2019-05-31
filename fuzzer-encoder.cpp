@@ -11,6 +11,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <deepstate/DeepState.hpp>
+
+using namespace deepstate;
+
+#include <assert.h>
+
 
 #ifdef MSAN
 extern "C" {
@@ -1023,20 +1029,10 @@ class EncoderFuzzer {
 
 static bool debug = false;
 
-extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv)
-{
-    char** _argv = *argv;
-    for (int i = 0; i < *argc; i++) {
-        if ( std::string(_argv[i]) == "--debug") {
-            debug = true;
-        }
-    }
+TEST(Lame, CrashIt) {
+    size_t size = 128;
+    uint8_t *data = (uint8_t*)DeepState_Malloc(size);
 
-    return 0;
-}
-
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-{
     Datasource ds(data, size);
 
     try {
@@ -1049,5 +1045,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         }
     } catch ( ... ) { }
 
-    return 0;
+    free(data);
 }
